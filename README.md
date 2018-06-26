@@ -1,10 +1,16 @@
 # MTB_MGRAST
 Identifying magnetotactic bacteria (MTB) in microbiome projects from the MGRAST database
 
-## Part 1:  Downloading metadata for MGRast projects
+## Part 1:  Downloading metadata for all MGRast projects
 First, we need to download all the emtadata for the projects in the MGRast database.  At the time of analysis, June 26, 2018, there are 54376 samples in 2175 projects.  The API tools in the [R package 'matR'](https://github.com/MG-RAST/matR) were used.
 ```R
 # Install the matR package
+remove.packages('matR')        # if necessary
+install.packages('devtools')
+library(devtools)
+install_github(repo='MG-RAST/matR') 
+library(matR)
+dependencies()
 
 # Load libraries
 library(matR)
