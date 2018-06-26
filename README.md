@@ -45,6 +45,10 @@ metadata.ids = cbind(ids, out)
 save(metadata.ids, file = "MGRast-metadata.final.Rdata")
 ```
 
+The two R-data files can be downloaded from this GitHub repository:
+- [ids.Rdata](./ids.Rdata)
+- [MGRast-metadata.final.Rdata](./MGRast-metadata.final.Rdata)
+
 ## Part 2:  Download normalized sequence counts for each sample
 In this section, the raw sequence counts assigned to each genus are retrieved and normalized to a total of 10000 sequence reads. If the sequences are from a 16S amplicon metagenome, then the [RDP database](https://rdp.cme.msu.edu/) is used, otherwise the [RefSeq database](https://www.ncbi.nlm.nih.gov/refseq/) is used.  
 The code, written and R, is implemented via the command line by simply giving the project number (`$PROJ`) as so:
