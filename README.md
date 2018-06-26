@@ -96,4 +96,5 @@ out = t(apply(generaTable, 2, function(x) y = x / sum(x) * 10000))
 # Save output to table
 write.table(out, file = paste0(p, ".mgrast.tsv"), sep = "\t", row.names = T, col.names = T, quote = F)
 ```
-
+You can also download the file here:
+- [mgrast.R](./mgrast.R)
