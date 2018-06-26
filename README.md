@@ -1,2 +1,4 @@
 # MTB_MGRAST
-Identifying magneto tactic bacteria in microbiome projects form the MGRAST database
+Identifying magnetotactic bacteria (MTB) in microbiome projects from the MGRAST database
+
+# test
