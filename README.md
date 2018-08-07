@@ -98,3 +98,29 @@ write.table(out, file = paste0(p, ".mgrast.tsv"), sep = "\t", row.names = T, col
 ```
 You can also download the file here:
 - [mgrast.R](./mgrast.R)
+
+
+Next, merge all the individual project's tsv files into a single, large data table for downstream use.
+```R
+# Read in all tsv file names
+tsv = list.files(".", pattern = ".tsv", full.names = T, recursive = T)
+
+# Read in initial dataset
+data = read.table(tsv[1], header = T, sep  ="\t", row.names = 1)
+data$samples = rownames(data); rownames(data) = NULL
+
+# Merge with additional datasets
+for (i in 2:length(tsv)){
+   tmp = read.table(tsv[i], header=T, sep="\t", row.names = 1)
+   tmp$samples = rownames(tmp); rownames(tmp) = NULL
+   data = merge(data, tmp, all = T)
+   save(data, file = "final.tmp.Rdata")
+   r = nrow(data)
+   c = ncol(data)
+   print(paste0("Finished TSV file ", i, " ... ", r, " samples and ", c, " genera..."))
+}
+
+# Save final results
+save(data, file = "final.table.Rdata")
+write.table(data, file = "final.table.tsv", quote = F, sep = "\t", header = T, row.names = F)
+```
