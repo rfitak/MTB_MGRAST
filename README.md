@@ -128,7 +128,7 @@ write.table(data, file = "final.table.tsv", quote = F, sep = "\t", header = T, r
 ## Part 3:  Download abundance counts for each MGRast sample using the python tools.
 ### MUCH FASTER!
 
-```
+```bash
 # Download and isntall the python tools
 git clone http://github.com/MG-RAST/MG-RAST-Tools
 cd MG-RAST-Tools
