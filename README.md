@@ -129,7 +129,7 @@ write.table(data, file = "final.table.tsv", quote = F, sep = "\t", header = T, r
 ### MUCH FASTER!
 
 ```bash
-# Download and isntall the python tools
+# Download and install the python tools
 git clone http://github.com/MG-RAST/MG-RAST-Tools
 cd MG-RAST-Tools
 python setup.py build
@@ -140,7 +140,7 @@ c=1
 while read i
    do
    mg-display-statistics.py --id "$i" --stat genus > $i.tsv
-   echo "Finished WGS $c"
+   echo "Finished sample number $c"
    c=$(( $c + 1 ))
 done < file
 ```
