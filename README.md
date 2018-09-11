@@ -124,3 +124,28 @@ for (i in 2:length(tsv)){
 save(data, file = "final.table.Rdata")
 write.table(data, file = "final.table.tsv", quote = F, sep = "\t", header = T, row.names = F)
 ```
+
+## Part 3:  Download abundance counts for each MGRast sample using the python tools.
+### MUCH FASTER!
+
+```
+# Download and isntall the python tools
+git clone http://github.com/MG-RAST/MG-RAST-Tools
+cd MG-RAST-Tools
+python setup.py build
+sudo python setup.py install
+
+# Loop through a file of samples
+c=1
+while read i
+   do
+   mg-display-statistics.py --id "$i" --stat genus > $i.tsv
+   echo "Finished WGS $c"
+   c=$(( $c + 1 ))
+done < file
+```
+
+Now process them in R  
+```R
+TBD...
+```
