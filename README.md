@@ -147,5 +147,34 @@ done < file
 
 Now process them in R  
 ```R
-TBD...
+# Read in all tsv file names
+tsv = list.files(".", pattern = ".tsv", full.names = F, recursive = T)
+
+# Read in initial dataset
+data = t(read.table(tsv[1], header = F, sep  ="\t", row.names = 1))
+data = 10000 * data / sum(data)
+data = data.frame(sample = sub(".tsv", "", tsv[1]), data)
+rownames(data) = NULL
+
+count = seq(1000, 55000, by = 1000)
+
+# Merge with additional datasets
+for (i in 2:length(tsv)){
+   tmp = t(read.table(tsv[i], header = F, sep  ="\t", row.names = 1))
+   tmp = 10000 * tmp / sum(tmp)
+   tmp = data.frame(sample = sub(".tsv", "", tsv[i]), tmp)
+   rownames(tmp) = NULL
+   data = merge(data, tmp, all = T)
+   if (i %in% count) save(data, file = "final.tmp.Rdata")
+   r = nrow(data)
+   c = ncol(data)
+   print(paste0("Finished TSV file ", i, " ... ", r, " samples and ", c, " genera..."))
+}
+
+# Normalize data
+#reads = apply(data, 1, function(x) sum(as.numeric(x[-1]), na.rm = T))
+
+# Save final results
+save(data, file = "final.table.Rdata")
+write.table(data, file = "final.table.tsv", quote = F, sep = "\t", header = T, row.names = F)
 ```
