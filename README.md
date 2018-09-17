@@ -49,6 +49,84 @@ The two R-data files can be downloaded from this GitHub repository:
 - [ids.Rdata](./ids.Rdata)
 - [MGRast-metadata.final.Rdata](./MGRast-metadata.final.Rdata)
 
+
+## Part 2:  Download abundance counts for each MGRast sample using the python tools.
+
+```bash
+# Download and install the python tools
+git clone http://github.com/MG-RAST/MG-RAST-Tools
+cd MG-RAST-Tools
+python setup.py build
+sudo python setup.py install
+
+# Loop through a file of samples IDs
+c=1
+while read i
+   do
+   mg-display-statistics.py --id "$i" --url=http://api.metagenomics.anl.go --stat species > $i.tsv
+   echo "Finished sample number $c"
+   c=$(( $c + 1 ))
+done < file
+```
+
+Now process them in R  
+```R
+# Read in all tsv file names
+tsv = list.files(".", pattern = ".tsv", full.names = F, recursive = T)
+
+# Read in initial dataset
+data = t(read.table(tsv[1], header = F, sep  ="\t", row.names = 1))
+data = 10000 * data / sum(data)
+data = data.frame(sample = sub(".tsv", "", tsv[1]), data)
+rownames(data) = NULL
+
+count = seq(1000, 55000, by = 1000)
+
+# Merge with additional datasets
+for (i in 2:length(tsv)){
+   tmp = t(read.table(tsv[i], header = F, sep  ="\t", row.names = 1))
+   tmp = 10000 * tmp / sum(tmp)
+   tmp = data.frame(sample = sub(".tsv", "", tsv[i]), tmp)
+   rownames(tmp) = NULL
+   data = merge(data, tmp, all = T)
+   if (i %in% count) save(data, file = "final.tmp.Rdata")
+   r = nrow(data)
+   c = ncol(data)
+   print(paste0("Finished TSV file ", i, " ... ", r, " samples and ", c, " genera..."))
+}
+
+# Save final results
+rownames(data) = data$sample
+data$sample = NULL
+save(data, file = "Full.species_table.Rdata")
+write.table(data, file = "Full.species_table.tsv", quote = F, sep = "\t", header = T, row.names = F)
+```
+
+## Part 3:  Processing and plotting the normalized species counts
+```R
+load("Full.species_table.Rdata")
+
+# Setup a vector of genus/species names to keep
+mag = c("Magnetospirillum", "Magnetovibrio", "Candidatus.Magnetobacterium", "Nitrospira", "Magnetococcus", "Magnetobacterium", "Desulfovibrio", "Desulfonatronum")
+
+# Filter for the genus/species names of interest and remove samples without any abundance, replace NA with 0
+data = data[,which(colnames(data) %in% mag)]
+data = data[which(rowSums(data, na.rm = T) > 0),]
+data = replace(data,is.na(data),0)
+
+# Principle components analysis
+data.pca <- prcomp(data, center = TRUE, scale = TRUE)
+scores = as.data.frame(data.pca$x)
+
+# Plot PCs
+library(ggplot2)
+ggplot(data = scores, aes(x = PC1, y = PC2, label = rownames(scores))) +
+  geom_hline(yintercept = 0, colour = "gray65") +
+  geom_vline(xintercept = 0, colour = "gray65") +
+  geom_text(colour = "tomato", alpha = 0.8, size = 4)
+```
+
+## __OLD CODE__
 ## Part 2:  Download normalized sequence counts for each sample
 In this section, the raw sequence counts assigned to each genus are retrieved and normalized to a total of 10000 sequence reads. If the sequences are from a 16S amplicon metagenome, then the [RDP database](https://rdp.cme.msu.edu/) is used, otherwise the [RefSeq database](https://www.ncbi.nlm.nih.gov/refseq/) is used.  
 The code, written and R, is implemented via the command line by simply giving the project number (`$PROJ`) as so:
@@ -119,60 +197,6 @@ for (i in 2:length(tsv)){
    c = ncol(data)
    print(paste0("Finished TSV file ", i, " ... ", r, " samples and ", c, " genera..."))
 }
-
-# Save final results
-save(data, file = "final.table.Rdata")
-write.table(data, file = "final.table.tsv", quote = F, sep = "\t", header = T, row.names = F)
-```
-
-## Part 3:  Download abundance counts for each MGRast sample using the python tools.
-### MUCH FASTER!
-
-```bash
-# Download and install the python tools
-git clone http://github.com/MG-RAST/MG-RAST-Tools
-cd MG-RAST-Tools
-python setup.py build
-sudo python setup.py install
-
-# Loop through a file of samples
-c=1
-while read i
-   do
-   mg-display-statistics.py --id "$i" --stat genus > $i.tsv
-   echo "Finished sample number $c"
-   c=$(( $c + 1 ))
-done < file
-```
-
-Now process them in R  
-```R
-# Read in all tsv file names
-tsv = list.files(".", pattern = ".tsv", full.names = F, recursive = T)
-
-# Read in initial dataset
-data = t(read.table(tsv[1], header = F, sep  ="\t", row.names = 1))
-data = 10000 * data / sum(data)
-data = data.frame(sample = sub(".tsv", "", tsv[1]), data)
-rownames(data) = NULL
-
-count = seq(1000, 55000, by = 1000)
-
-# Merge with additional datasets
-for (i in 2:length(tsv)){
-   tmp = t(read.table(tsv[i], header = F, sep  ="\t", row.names = 1))
-   tmp = 10000 * tmp / sum(tmp)
-   tmp = data.frame(sample = sub(".tsv", "", tsv[i]), tmp)
-   rownames(tmp) = NULL
-   data = merge(data, tmp, all = T)
-   if (i %in% count) save(data, file = "final.tmp.Rdata")
-   r = nrow(data)
-   c = ncol(data)
-   print(paste0("Finished TSV file ", i, " ... ", r, " samples and ", c, " genera..."))
-}
-
-# Normalize data
-#reads = apply(data, 1, function(x) sum(as.numeric(x[-1]), na.rm = T))
 
 # Save final results
 save(data, file = "final.table.Rdata")
