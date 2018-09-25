@@ -100,30 +100,41 @@ rownames(data) = data$sample
 data$sample = NULL
 save(data, file = "Full.species_table.Rdata")
 write.table(data, file = "Full.species_table.tsv", quote = F, sep = "\t", header = T, row.names = F)
+
+# Get subtable of only magnetotactic bacteria species
+# load vector of species names
+mtb = scan("MTB2", what = "character")
+data.mtb = data[, which(colnames(data) %in% mtb)]
+data.mtb = data.matrix(data.mtb)
+data.mtb[is.na(data.mtb)] <- 0
+data.mtb.clean = data.mtb[which(rowSums(data.mtb) > 0),]   # remove samples without any MTB
+
+# Merge with metadata
+out = as.data.frame(data.mtb.clean)
+out$Total = rowSums(data.mtb.clean)
+load("MGRast-metadata.final.Rdata")
+tmp = metadata.ids[which(metadata.ids$Sample %in% rownames(out)), c(1,2,7,12,14,18,21,34,39,40,44,54,55,72)]
+tmp = tmp[order(tmp$Sample),]
+out = cbind(out[order(rownames(out)),], tmp)
+save(out, file = "MTB.table.Rdata")
 ```
 
 ## Part 3:  Processing and plotting the normalized species counts
 ```R
-load("Full.species_table.Rdata")
-
-# Setup a vector of genus/species names to keep
-mag = c("Magnetospirillum", "Magnetovibrio", "Candidatus.Magnetobacterium", "Nitrospira", "Magnetococcus", "Magnetobacterium", "Desulfovibrio", "Desulfonatronum")
-
-# Filter for the genus/species names of interest and remove samples without any abundance, replace NA with 0
-data = data[,which(colnames(data) %in% mag)]
-data = data[which(rowSums(data, na.rm = T) > 0),]
-data = replace(data,is.na(data),0)
+load("MTB.table.Rdata")
+data = out
 
 # Principle components analysis
-data.pca <- prcomp(data, center = TRUE, scale = TRUE)
+data.pca <- prcomp(data[,1:21], center = TRUE, scale = TRUE)
 scores = as.data.frame(data.pca$x)
+data = cbind(out, scores)
 
 # Plot PCs
 library(ggplot2)
-ggplot(data = scores, aes(x = PC1, y = PC2, label = rownames(scores))) +
+ggplot(data, aes(x = PC1, y = PC2, color = metadata.env_package.data.env_package)) +
   geom_hline(yintercept = 0, colour = "gray65") +
   geom_vline(xintercept = 0, colour = "gray65") +
-  geom_text(colour = "tomato", alpha = 0.8, size = 4)
+  geom_point()
 ```
 
 ## __OLD CODE__
