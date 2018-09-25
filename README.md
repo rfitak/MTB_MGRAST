@@ -135,6 +135,22 @@ ggplot(data, aes(x = PC1, y = PC2, color = metadata.env_package.data.env_package
   geom_hline(yintercept = 0, colour = "gray65") +
   geom_vline(xintercept = 0, colour = "gray65") +
   geom_point()
+
+
+# Build dendrogram and plot (select only "host-associated" samples)
+library(dendextend)
+data2 = subset(data, metadata.env_package.data.env_package == "host-associated")
+d <- dist(data2[,1:21], method = "euclidean") # distance matrix
+fit <- hclust(d, method="ward")
+fit.d = as.dendrogram(fit)
+fit.d %>%
+  set("leaves_pch", 19) %>%
+  set("leaves_cex", 0.5) %>%
+  set("leaves_col", as.numeric(as.factor(data2$metadata.sample.data.material))) %>%
+  set("labels", "") %>%
+  set("branches_k_color", k = 8) %>%
+  plot
+fit.d %>% rect.dendrogram(k = 8, border = "red", lty = 5, lwd = 2)
 ```
 
 ## __OLD CODE__
