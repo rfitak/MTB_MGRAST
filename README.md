@@ -1,9 +1,9 @@
-# MTB_MGRAST
+# Mining Magnetotactic Bacteria Abundance in Metagenomes Uploaded to MGRAST
 Identifying magnetotactic bacteria (MTB) in microbiome projects from the MGRAST database
 Special thanks to Victoria Hsiung for the original implementations of this code.
 
 ## Part 1:  Downloading metadata for all MGRast projects
-First, we need to download all the emtadata for the projects in the MGRast database.  At the time of analysis, June 26, 2018, there are 54376 samples in 2175 projects.  The API tools in the [R package 'matR'](https://github.com/MG-RAST/matR) were used.
+First, we need to download all the metadata for the projects in the MGRast database.  At the time of analysis, June 26, 2018, there are 54376 samples in 2175 projects.  The API tools in the [R package 'matR'](https://github.com/MG-RAST/matR) were used.
 ```R
 # Install the matR package
 remove.packages('matR')        # if necessary
@@ -59,7 +59,7 @@ cd MG-RAST-Tools
 python setup.py build
 sudo python setup.py install
 
-# Loop through a file of samples IDs
+# Loop through a file of sample IDs
 c=1
 while read i
    do
